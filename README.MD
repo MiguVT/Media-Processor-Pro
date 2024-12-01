@@ -27,7 +27,25 @@ Una aplicación de escritorio para crear variaciones únicas de tus videos e im�
 - Cambios de contraste
 - Padding aleatorio
 
-## 🛠️ Instalación
+## 📥 Instalación
+
+### Windows
+1. Visita la [última versión](https://github.com/MiguVT/Media-Processor-Pro/releases/latest)
+2. Descarga:
+   - `MediaProcessorPro-Setup.exe` para la versión instalable
+   - `MediaProcessorPro-Portable.exe` para la versión portable
+
+### Versión Instalable
+1. Ejecuta `MediaProcessorPro-Setup.exe`
+2. Sigue el asistente de instalación
+3. La aplicación se instalará y creará accesos directos
+
+### Versión Portable
+1. Descarga el ejecutable portable
+2. Ejecuta directamente, no requiere instalación
+3. Puedes moverlo a cualquier ubicación o unidad USB
+
+## 🛠️ Compilación desde código fuente
 
 1. Clona el repositorio:
 ```bash
@@ -39,7 +57,7 @@ git clone https://github.com/MiguVT/Media-Processor-Pro.git
 pnpm install
 ```
 
-3. Inicia la aplicación en modo desarrollo:
+3. Inicia en modo desarrollo:
 ```bash
 pnpm start
 ```
@@ -48,9 +66,7 @@ pnpm start
 ```bash
 pnpm run build
 ```
-
-## 📦 Requisitos
-
+### 📦 Requisitos para compilación
 - Node.js 14 o superior
 - pnpm
 
