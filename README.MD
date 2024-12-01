@@ -31,7 +31,7 @@ Una aplicación de escritorio para crear variaciones únicas de tus videos e im�
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tu-usuario/media-processor-pro.git
+git clone https://github.com/MiguVT/Media-Processor-Pro.git
 ```
 
 2. Instala las dependencias:
