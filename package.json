@@ -13,8 +13,8 @@
     "tailwindcss": "^3.4.15"
   },
   "name": "media-processor-pro",
-  "version": "1.0.0",
-  "description": "Editor automático de fotos y videos con ajustes aleatorios",
+  "version": "1.0.1",
+  "description": "Media Processor Pro - Generador de variaciones de videos e imágenes",
   "author": "MiguVT",
   "main": "main.js",
   "scripts": {
@@ -28,20 +28,46 @@
   "build": {
     "appId": "com.mediaprocessorpro.app",
     "productName": "Media Processor Pro",
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/sharp/**/*"
+    ],
     "files": [
       "**/*"
     ],
+    "extraResources": [
+      {
+        "from": "node_modules/ffmpeg-static/ffmpeg.exe",
+        "to": "bin/ffmpeg.exe"
+      },
+      {
+        "from": "node_modules/ffprobe-static/bin/win32/x64/ffprobe.exe",
+        "to": "bin/ffprobe.exe"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Media Processor Pro"
+    },
     "directories": {
       "output": "dist",
       "buildResources": "build"
-    },
-    "win": {
-      "target": "nsis"
-    },
-    "asarUnpack": [
-      "node_modules/ffmpeg-static/**/*",
-      "node_modules/ffprobe-static/**/*",
-      "node_modules/sharp/**/*"
-    ]
+    }
   }
 }

@@ -2,14 +2,23 @@ const ffmpeg = require('fluent-ffmpeg');
 const sharp = require('sharp');
 const path = require('path');
 const { EventEmitter } = require('events');
-const { isImage, isVideo } = require('./validators');
+const { app } = require('electron');
+const { getFfmpegPaths } = require('./validators')
 
 class MediaProcessor extends EventEmitter {
     constructor(inputPath) {
         super();
         this.inputPath = inputPath;
         this.outputDir = path.dirname(inputPath);
-        this.isImage = isImage(inputPath);
+        
+        // Configurar FFmpeg
+        const { ffmpeg: ffmpegbin, ffprobe: ffprobebin } = getFfmpegPaths();
+        
+        console.log('FFmpeg Path:', ffmpegbin);
+        console.log('FFprobe Path:', ffprobebin);
+        
+        ffmpeg.setFfmpegPath(ffmpegbin);
+        ffmpeg.setFfprobePath(ffprobebin);
     }
 
     async generateVariants(count) {

@@ -1,8 +1,37 @@
 const ffmpeg = require('fluent-ffmpeg');
 const sharp = require('sharp');
 const path = require('path');
-const { promisify } = require('util');
-const fs = require('fs').promises;
+const { app } = require('electron');
+const ffmpegStatic = require('ffmpeg-static');
+const ffprobeStatic = require('ffprobe-static');
+
+// Función para obtener las rutas de FFmpeg
+function getFfmpegPaths() {
+    if (app.isPackaged) {
+        // Versión compilada
+        const resourcePath = process.resourcesPath;
+        return {
+            ffmpeg: path.join(resourcePath, 'bin', 'ffmpeg.exe'),
+            ffprobe: path.join(resourcePath, 'bin', 'ffprobe.exe')
+        };
+    } else {
+        // Versión de desarrollo
+        return {
+            ffmpeg: ffmpegStatic,
+            ffprobe: ffprobeStatic.path
+        };
+    }
+}
+
+const { ffmpeg: ffmpegPath, ffprobe: ffprobePath } = getFfmpegPaths();
+
+console.log('Is Packaged:', app.isPackaged);
+console.log('FFmpeg Path:', ffmpegPath);
+console.log('FFprobe Path:', ffprobePath);
+
+// Configurar FFmpeg con las rutas correctas
+ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfprobePath(ffprobePath);
 
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 const VIDEO_EXTENSIONS = ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.MOV'];
@@ -17,31 +46,40 @@ function isVideo(filePath) {
 
 async function validateMediaFile(filePath) {
     try {
+        console.log('Validando archivo:', filePath);
         const ext = path.extname(filePath).toLowerCase();
 
         if (isImage(filePath)) {
-            // Validar imagen usando sharp
-            await sharp(filePath).metadata();
-            return { isValid: true, type: 'image' };
+            try {
+                await sharp(filePath).metadata();
+                return { isValid: true, type: 'image' };
+            } catch (error) {
+                console.error('Error validando imagen:', error);
+                return { isValid: false, type: 'unknown' };
+            }
         } 
-        else if (isVideo(filePath)) {
-            // Validar video usando ffmpeg
-            const isValid = await new Promise((resolve) => {
+        
+        if (isVideo(filePath)) {
+            return new Promise((resolve) => {
                 ffmpeg.ffprobe(filePath, (err, metadata) => {
                     if (err) {
-                        resolve(false);
+                        console.error('Error en ffprobe:', err);
+                        resolve({ isValid: false, type: 'unknown' });
                         return;
                     }
+
                     const hasVideoStream = metadata.streams.some(stream => stream.codec_type === 'video');
-                    resolve(hasVideoStream);
+                    console.log('Streams encontrados:', metadata.streams.length);
+                    console.log('¿Tiene stream de video?:', hasVideoStream);
+
+                    resolve({ isValid: hasVideoStream, type: 'video' });
                 });
             });
-            return { isValid, type: 'video' };
         }
         
         return { isValid: false, type: 'unknown' };
     } catch (error) {
-        console.error('Error validando archivo:', error);
+        console.error('Error en validación:', error);
         return { isValid: false, type: 'unknown' };
     }
 }
@@ -49,5 +87,6 @@ async function validateMediaFile(filePath) {
 module.exports = {
     validateMediaFile,
     isImage,
-    isVideo
+    isVideo,
+    getFfmpegPaths
 };
