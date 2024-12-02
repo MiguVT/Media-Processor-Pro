@@ -2,23 +2,14 @@ const ffmpeg = require('fluent-ffmpeg');
 const sharp = require('sharp');
 const path = require('path');
 const { EventEmitter } = require('events');
-const { app } = require('electron');
-const { getFfmpegPaths } = require('./validators')
+const { isImage } = require('./validators');
 
 class MediaProcessor extends EventEmitter {
     constructor(inputPath) {
         super();
         this.inputPath = inputPath;
         this.outputDir = path.dirname(inputPath);
-        
-        // Configurar FFmpeg
-        const { ffmpeg: ffmpegbin, ffprobe: ffprobebin } = getFfmpegPaths();
-        
-        console.log('FFmpeg Path:', ffmpegbin);
-        console.log('FFprobe Path:', ffprobebin);
-        
-        ffmpeg.setFfmpegPath(ffmpegbin);
-        ffmpeg.setFfprobePath(ffprobebin);
+        this.isImageFile = isImage(inputPath);
     }
 
     async generateVariants(count) {
@@ -42,15 +33,21 @@ class MediaProcessor extends EventEmitter {
         return results;
     }
 
+    getOutputPath(index) {
+        const extension = path.extname(this.inputPath);
+        const prefix = this.isImageFile ? 'output_image' : 'output_video';
+        return path.join(this.outputDir, `${prefix}_${index}${extension}`);
+    }
+
     async processMedia(index) {
-        if (this.isImage) {
+        if (this.isImageFile) {
             return this.processImage(index);
         }
         return this.processVideo(index);
     }
 
     async processImage(index) {
-        const outputPath = path.join(this.outputDir, `output_image_${index}${path.extname(this.inputPath)}`);
+        const outputPath = this.getOutputPath(index);
         
         try {
             const image = sharp(this.inputPath);
@@ -81,7 +78,7 @@ class MediaProcessor extends EventEmitter {
     }
 
     async processVideo(index) {
-        const outputPath = path.join(this.outputDir, `output_video_${index}.mp4`);
+        const outputPath = this.getOutputPath(index);
         
         return new Promise((resolve, reject) => {
             const command = ffmpeg(this.inputPath);
